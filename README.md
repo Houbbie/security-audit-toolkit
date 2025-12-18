@@ -138,7 +138,7 @@ Rotate: Genereer nieuwe credentials.
 
 Remediate: Gebruik git-filter-repo om de historie van de repository te zuiveren. Let op: Alleen de regel verwijderen uit je huidige code lost het beveiligingsrisico niet op!
 
-###📄 Licentie & Auteur
+### 📄 Licentie & Auteur
 Ontwikkeld door Edwin Houben.
 
 Disclaimer: Uitsluitend voor educatieve doeleinden en geautoriseerde security-audits.
