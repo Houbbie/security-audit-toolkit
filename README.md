@@ -68,3 +68,24 @@ if __name__ == "__main__":
     results = hunter.run_scan(GITHUB_REPO)
     hunter.export_report(results)
     print(f"✅ Audit voltooid. Bevindingen: {len(results)}")
+
+'''
+### 2. De Docker-container (Dockerfile)
+Gebruik de officiële image als bron voor maximale stabiliteit:
+
+'''
+# Stap 1: Leen de binary van de officiële scanner
+FROM trufflesecurity/trufflehog:latest AS scanner
+
+# Stap 2: Onze eigen Python omgeving
+FROM python:3.11-slim
+RUN apt-get update && apt-get install -y git ca-certificates && apt-get clean
+
+# Kopieer de scanner naar onze image
+COPY --from=scanner /usr/bin/trufflehog /usr/bin/trufflehog
+
+WORKDIR /app
+COPY hunter.py .
+
+CMD ["python", "hunter.py"]
+'''
