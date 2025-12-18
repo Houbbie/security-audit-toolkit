@@ -89,3 +89,56 @@ COPY hunter.py .
 
 CMD ["python", "hunter.py"]
 ```
+
+### 🚀 Gebruik
+Bouw de image:
+
+```Bash
+docker build -t apex-hunter-engine .
+```
+Voer de scan uit:
+
+```Bash
+docker run -it -v "$(pwd):/app" apex-hunter-engine
+```
+
+### 🤖 CI/CD Integratie (GitHub Actions)
+Voeg dit bestand toe aan .github/workflows/security-scan.yml voor automatische controles bij elke push:
+
+```YAML
+
+name: Apex Hunter Security Audit
+
+on: [push]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Build & Run Scan
+        run: |
+          docker build -t apex-hunter-engine .
+          docker run -v "$(pwd):/app" apex-hunter-engine
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-audit-report
+          path: SECURITY_AUDIT_REPORT.md
+```
+
+### 🚨 Incident Response Playbook
+Wat moet je doen als er lekken worden gevonden?
+
+Revoke: Deactiveer de gevonden sleutels direct in het dashboard van de provider (AWS, Stripe, etc.).
+
+Rotate: Genereer nieuwe credentials.
+
+Remediate: Gebruik git-filter-repo om de historie van de repository te zuiveren. Let op: Alleen de regel verwijderen uit je huidige code lost het beveiligingsrisico niet op!
+
+###📄 Licentie & Auteur
+Ontwikkeld door Edwin Houben.
+
+Disclaimer: Uitsluitend voor educatieve doeleinden en geautoriseerde security-audits.
