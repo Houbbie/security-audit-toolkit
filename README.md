@@ -1,121 +1,124 @@
-Markdown
+# **🛡️ Apex Hunter: Security Audit Engine**
 
-# 🛡️ Security Audit & PoC Toolkit
-
-**Geautomatiseerde detectie, validatie en forensische analyse van secrets in broncode.**
-
-Deze repository bevat een verzameling Python-scripts ontworpen om de output van security scanners (zoals **Gitleaks** en **TruffleHog**) te verwerken. Het gaat verder dan simpele detectie: deze toolkit biedt "Proof of Concept" (PoC) scripts om de impact van gevonden lekken technisch te valideren en "verwijderde" secrets in de Git-historie op te sporen.
+**Apex Hunter** is een gecontaineriseerde security engine ontworpen om "geheimen" (secrets) op te sporen in de volledige historie van een GitHub repository. Het vindt API-sleutels, wachtwoorden en certificaten die per ongeluk zijn gecommit, zelfs als ze inmiddels uit de huidige code zijn verwijderd.
 
 ---
 
-## ⚠️ Disclaimer
+## **📖 Inhoudsopgave**
 
-**Alleen voor educatief en ethisch gebruik.**
-
-Gebruik deze tools nooit op repositories waarvan u niet de eigenaar bent of waarvoor u geen expliciete schriftelijke toestemming heeft voor een security audit. De validatie-scripts voeren lokale cryptografische checks uit en maken standaard geen verbinding met externe netwerken.
-
----
-
-## 🚀 Features
-
-Deze toolkit pakt de grootste uitdagingen in Secret Management aan:
-
-* **📊 Analyse & Prioritering (`analyze_secrets.py`)**
-    * Combineert JSON-output van Gitleaks en TruffleHog.
-    * Berekent **Shannon Entropie** om onderscheid te maken tussen echte cryptografische sleutels (hoog risico) en false positives (lage entropie).
-    * Genereert een schone rapportage-tabel.
-
-* **🔑 Cryptografische Validatie (`validate_keys.py`)**
-    * Probeert gevonden private keys (PEM/RSA) daadwerkelijk te parsen met de `cryptography` library.
-    * Checkt of sleutels beveiligd zijn met een wachtwoord.
-    * Detecteert zwakke encryptie (bijv. 512-bit RSA).
-
-* **📝 Contextuele Analyse (`reveal_passwords.py`)**
-    * Inspecteert de broncode rondom gevonden wachtwoorden.
-    * Bepaalt of een wachtwoord gekoppeld is aan actieve resources (zoals een Database of VM in Terraform code).
-
-* **👻 Forensisch Onderzoek (`git_history_revealer.py`)**
-    * Zoekt naar "Ghost Secrets": wachtwoorden die uit de bestanden zijn verwijderd, maar nog steeds bestaan in de `.git` geschiedenis.
-    * Demonstreert waarom `git rm` onvoldoende is voor het verwijderen van gevoelige data.
+1. [Hoe het werkt](https://www.google.com/search?q=%23-hoe-het-werkt&authuser=1)
+2. [Systeemvereisten](https://www.google.com/search?q=%23-systeemvereisten&authuser=1)
+3. [Installatie & Setup](https://www.google.com/search?q=%23-installatie--setup&authuser=1)
+4. [Gebruik](https://www.google.com/search?q=%23-gebruik&authuser=1)
+5. [Het Rapport Begrijpen](https://www.google.com/search?q=%23-het-rapport-begrijpen&authuser=1)
+6. [Incident Response Playbook](https://www.google.com/search?q=%23-incident-response-playbook&authuser=1)
+7. [Probleemoplossing](https://www.google.com/search?q=%23-probleemoplossing&authuser=1)
 
 ---
 
-## 📦 Installatie
+## **🧐 Hoe het werkt**
 
-1.  **Clone deze repository:**
-    ```bash
-    git clone [https://github.com/JOUW_GEBRUIKERSNAAM/security-audit-toolkit.git](https://github.com/JOUW_GEBRUIKERSNAAM/security-audit-toolkit.git)
-    cd security-audit-toolkit
-    ```
+In de moderne softwareontwikkeling is een "delete" in je code niet genoeg. Git onthoudt alles. Apex Hunter gebruikt een **Multi-stage Docker Build** om de krachtige TruffleHog v3 engine te combineren met een op maat gemaakte Python wrapper.
 
-2.  **Installeer dependencies:**
-    De scripts maken gebruik van de standaard Python libraries, plus `cryptography` voor validatie.
-    ```bash
-    pip install -r requirements.txt
-    ```
+1. **De Engine:** Scant elke commit, branch en tag in de opgegeven GitHub URL.
+2. **De Analyse:** Filtert ruwe data en bepaalt de ernst (Critical, High, Medium).
+3. **De Rapportage:** Genereert een Markdown-bestand dat direct bruikbaar is voor security-audits.
 
 ---
 
-## 🛠️ Gebruikshandleiding
+## **💻 Systeemvereisten**
 
-### Stap 1: Voorbereiding (Scannen)
-Zorg dat u `gitleaks` of `trufflehog` lokaal heeft geïnstalleerd en draai een scan op uw **doel-repository**. Sla de output op in de root van deze toolkit.
+* **Docker Desktop:** Geïnstalleerd en actief.
+* **Git:** Voor het beheren van je broncode.
+* **GitHub Account:** Met een repository om te scannen.
 
-```bash
-# Voorbeeld Gitleaks scan
-gitleaks detect --source="/pad/naar/doel-repo" --report-path="gitleaks.json" --report-format="json"
-Stap 2: Analyse
-Verwerk de ruwe data tot een leesbaar overzicht.
+---
 
-Bash
+## **🛠️ Installatie & Setup**
 
-python analyze_secrets.py
-Stap 3: Validatie (PoC)
-Open validate_keys.py of reveal_passwords.py in een teksteditor. Pas de variabele REPO_ROOT in het script aan zodat deze verwijst naar de map van de gescande repository:
+### **1. Bestanden voorbereiden**
 
-Python
+Zorg dat de volgende twee bestanden in je projectmap staan:
 
-# Voorbeeld in validate_keys.py
-REPO_ROOT = "/Users/gebruiker/pad/naar/gescande_repo"
-Voer vervolgens het script uit:
+* **hunter.py**: De logica van de audit.
+* **Dockerfile**: De instructies voor de Docker-container.
 
-Bash
+### **2. De Engine Bouwen**
 
-python validate_keys.py
-Stap 4: Historisch Onderzoek
-Om te bewijzen dat verwijderde wachtwoorden nog terug te halen zijn ("Time Machine" hack):
+Open je terminal en voer het volgende commando uit om de Docker-image te maken:
 
-Open git_history_revealer.py.
+| Bashdocker build -t apex-hunter-engine . |
+| :---- |
 
-Zet REPO_ROOT naar de juiste map.
+---
 
-Zet SEARCH_TERM naar een fragment van het wachtwoord dat u zoekt.
+## **🚀 Gebruik**
 
-Draai het script:
+Om een scan uit te voeren op je repository, gebruik je het onderstaande commando. De -v vlag zorgt ervoor dat het rapport direct op je lokale machine (je MacBook) wordt opgeslagen.
 
-Bash
+| Bashdocker run -it -v "$(pwd):/app" apex-hunter-engine |
+| :---- |
 
-python git_history_revealer.py
-📂 Bestandsstructuur
-Plaintext
+### **Wat gebeurt er tijdens de run?**
 
-/security-audit-toolkit
-├── analyze_secrets.py       # Aggregator & Entropy calculator
-├── validate_keys.py         # Private Key validator
-├── reveal_passwords.py      # Code context extractor
-├── git_history_revealer.py  # Git log forensics tool
-├── requirements.txt         # Python dependencies
-├── .gitignore               # Voorkomt uploaden van scan-resultaten
-└── README.md                # Deze documentatie
-🛡️ Remediatie Advies
-Indien deze tools kwetsbaarheden vinden, worden de volgende stappen aangeraden:
+* De container start op en zoekt naar de geconfigureerde GitHub URL.
+* TruffleHog analyseert de gehele Git-historie.
+* Het script hunter.py vangt de resultaten op en schrijft deze naar SECURITY\_AUDIT\_REPORT.md.
 
-Revoke: Trek de gevonden sleutels/certificaten onmiddellijk in.
+---
 
-Rotate: Genereer nieuwe credentials.
+## **📊 Het Rapport Begrijpen**
 
-Rewrite History: Gebruik tools zoals git-filter-repo of BFG Repo-Cleaner om de data permanent uit de .git database te wissen.
+Na de scan vind je een bestand genaamd SECURITY\_AUDIT\_REPORT.md.
 
-Pre-Commit Hooks: Implementeer automatische scanning in de CI/CD pipeline om herhaling te voorkomen.
+* **🔴 KRITIEK:** Er zijn actieve keys gevonden (bijv. AWS, Azure, Private Keys).
+* **🟠 HOOG:** Er zijn API-sleutels gevonden (bijv. Stripe, Slack, Twilio).
+* **🟢 VEILIG:** Er zijn geen lekken gevonden in de historie.
 
-Licentie: MIT
+---
+
+## **🚨 Incident Response Playbook**
+
+Wat moet je doen als Apex Hunter een lek vindt?
+
+1. **Revoke:** Deactiveer de sleutel onmiddellijk in het dashboard van de provider (bijv. AWS Console).
+2. **Rotate:** Genereer een nieuwe sleutel.
+3. **Remediate:** Gebruik tools zoals BfG Repo-Cleaner of git-filter-repo om de historie van je GitHub repo te wissen. *Alleen de code aanpassen is niet voldoende!*
+
+---
+
+## **❓ Probleemoplossing**
+
+| Probleem                 | Oplossing                                                                                                                          |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| Repository not found     | Controleer of de URL in hunter.py correct is en of de repo publiek is (of gebruik een token).                                      |
+| Docker permission denied | Zorg dat Docker Desktop actief is en je de juiste rechten hebt op de map.                                                          |
+| 0 Findings               | Gefeliciteerd\\! Of je hebt de "Push Protection" van GitHub nog aanstaan waardoor je test-keys nooit op de server zijn aangekomen. |
+
+---
+
+## **🤖 CI/CD Integratie (GitHub Actions)**
+
+Het handmatig draaien van een scan is goed, maar automatische controle bij elke "push" is beter. Hiermee voorkom je dat een lek ooit de productie-omgeving bereikt.
+
+### **Automatische Security Scan instellen**
+
+1. Maak in je project de mappenstructuur aan: `.github/workflows/`
+2. Maak hierin een bestand genaamd `security-scan.yml`.
+3. Plak de volgende configuratie in dat bestand:
+
+| YAMLname: Apex Hunter Security Auditon:  push:    branches: [ main ]  pull\_request:    branches: [ main ]jobs:  audit:    runs-on: ubuntu-latest    steps:      - name: Checkout code        uses: actions/checkout@v3        with:          fetch-depth: 0 \\# Nodig om de volledige historie te scannen      - name: Build Apex Hunter Engine        run: docker build -t apex-hunter-engine .      - name: Run Security Audit        run: docker run apex-hunter-engine      - name: Upload Audit Rapport        uses: actions/upload-artifact@v3        if: always() \\# Upload het rapport ook als er lekken zijn gevonden        with:          name: security-audit-report          path: SECURITY\_AUDIT\_REPORT.md |
+| :---- |
+
+### **Wat gebeurt er nu?**
+
+* **Shift Left Security:** Elke keer dat jij of een teamgenoot code pusht naar GitHub, start de Apex Hunter Engine automatisch.
+* **Failsafe:** Als er een geheim wordt gevonden, kun je de "build" laten falen, zodat de onveilige code nooit live gaat.
+* **Artifacts:** Het gegenereerde `SECURITY_AUDIT_REPORT.md` wordt opgeslagen bij de GitHub Action-run, zodat je het altijd kunt teruglezen.
+
+**📄 Licentie & Auteur**
+
+Ontwikkeld door **Edwin Houben**.
+
+*Disclaimer: Deze tool is uitsluitend bedoeld voor educatieve doeleinden en geautoriseerde security-audits.*
+
