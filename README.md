@@ -69,11 +69,11 @@ if __name__ == "__main__":
     hunter.export_report(results)
     print(f"✅ Audit voltooid. Bevindingen: {len(results)}")
 
-'''
+```
 ### 2. De Docker-container (Dockerfile)
 Gebruik de officiële image als bron voor maximale stabiliteit:
 
-'''
+```
 # Stap 1: Leen de binary van de officiële scanner
 FROM trufflesecurity/trufflehog:latest AS scanner
 
@@ -88,4 +88,4 @@ WORKDIR /app
 COPY hunter.py .
 
 CMD ["python", "hunter.py"]
-'''
+```
