@@ -73,7 +73,7 @@ if __name__ == "__main__":
 ### 2. De Docker-container (Dockerfile)
 Gebruik de officiële image als bron voor maximale stabiliteit:
 
-```
+```yaml
 # Stap 1: Leen de binary van de officiële scanner
 FROM trufflesecurity/trufflehog:latest AS scanner
 
